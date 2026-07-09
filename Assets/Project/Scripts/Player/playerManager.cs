@@ -90,7 +90,7 @@ public class playerManager : MonoBehaviour
     {
         playerInteractionTag = other.tag;
 
-        if (other.CompareTag(playerInteractionTag) && playerInputs.Player.Interact.IsPressed())
+        if (other.CompareTag(playerInteractionTag) && playerInputs.Player.Interact.WasPressedThisFrame())
         {
             InteractWith(playerInteractionTag);
         }
