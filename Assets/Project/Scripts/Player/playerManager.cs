@@ -32,6 +32,8 @@ public class playerManager : MonoBehaviour
     [SerializeField] private int Id, index;
     public int[] IdSecuence;
 
+    private MixManger.Recipe ingredient;
+
     #endregion
 
     #endregion
@@ -104,6 +106,7 @@ public class playerManager : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         isInteract = false;
+        //playerInteractionTag = "";
     }
 
     public void InteractWith(string tagCase)
@@ -119,6 +122,7 @@ public class playerManager : MonoBehaviour
                 break;
 
             case "ingrediente 1":
+                //ingredient.ingredientsIds/
                 Id = 1;
                 series[0] = true;
                 series[1] = false;
@@ -183,15 +187,6 @@ public class playerManager : MonoBehaviour
                 IdSecuence[indicator] = Id;
                 break;
         }
-
-        //for (int i = 0; i < IdSecuence.Length; i ++)
-        //{
-        //    if (IdSecuence[i] == Id)
-        //    {
-        //        IdSecuence[i + 1] = 0;
-        //    }
-                
-        //}
     }
 
     #endregion
