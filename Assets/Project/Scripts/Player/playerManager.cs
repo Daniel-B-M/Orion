@@ -21,6 +21,8 @@ public class playerManager : MonoBehaviour
     [Tooltip("cuanto mas alto el valor mas rapido se mueve el jugador, cuanto mas bajo el valor mas lento se mueve el jugador")]
     [SerializeField] private float playerSpeed;
     private Rigidbody rb;
+    private Animator animator;
+    private Quaternion initialRotation;
 
     #endregion
 
@@ -59,6 +61,8 @@ public class playerManager : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponentInChildren<Animator>();
+        initialRotation = transform.rotation;
     }
     
     void Update()
@@ -67,8 +71,19 @@ public class playerManager : MonoBehaviour
 
         if (isInteract && playerInputs.Player.Interact.WasPressedThisFrame())
         {
+            if (animator != null)
+            {
+                animator.SetTrigger("Action");
+            }
             InteractWith(playerInteractionTag);
         }
+        UpdateAnimations();
+    }
+
+    private void UpdateAnimations()
+    {
+        float speed = inputMovement.magnitude;
+        animator.SetFloat("Speed", speed);
     }
 
     private void FixedUpdate()
@@ -82,11 +97,17 @@ public class playerManager : MonoBehaviour
 
     void Movement()
     {
-        //Vector3 direction = new Vector3(inputMovement.x, 0f, inputMovement.y);
-        //transform.Translate(direction * playerSpeed * Time.deltaTime, Space.World);
-
-        Vector3 direction = (transform.forward * inputMovement.y + transform.right * inputMovement.x).normalized;
-        rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
+        Vector3 inputDir = new Vector3(inputMovement.x, 0, inputMovement.y);
+        Vector3 direction = (initialRotation * inputDir).normalized;
+        direction.y = 0f; // Asegurarse de que la dirección no tenga componente vertical
+        direction.Normalize();
+        
+        if (direction.magnitude > 0.1f)
+        {
+            rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 15f * Time.fixedDeltaTime));
+        }
     }
 
     #endregion
