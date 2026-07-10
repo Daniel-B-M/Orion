@@ -7,6 +7,8 @@ TagManager:
   - cliente
   - mezclar
   - ingrediente 1
+  - ingrediente 2
+  - ingrediente 3
   layers:
   - Default
   - TransparentFX

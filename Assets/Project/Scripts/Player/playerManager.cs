@@ -26,7 +26,11 @@ public class playerManager : MonoBehaviour
 
     #region Variables de interaccion del jugador
 
-    private string playerInteractionTag;
+    [SerializeField] private string playerInteractionTag;
+    [SerializeField] private bool isInteract;
+    [SerializeField] private bool[] series;
+    [SerializeField] private int Id, index;
+    public int[] IdSecuence;
 
     #endregion
 
@@ -62,6 +66,11 @@ public class playerManager : MonoBehaviour
     void Update()
     {
         inputMovement = playerInputs.Player.Move.ReadValue<Vector2>();
+
+        if (isInteract && playerInputs.Player.Interact.WasPressedThisFrame())
+        {
+            InteractWith(playerInteractionTag);
+        }
     }
 
     private void FixedUpdate()
@@ -86,14 +95,15 @@ public class playerManager : MonoBehaviour
 
     #region Funciones de interaccion del jugador
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
+        isInteract = true;
         playerInteractionTag = other.tag;
+    }
 
-        if (other.CompareTag(playerInteractionTag) && playerInputs.Player.Interact.WasPressedThisFrame())
-        {
-            InteractWith(playerInteractionTag);
-        }
+    private void OnTriggerExit(Collider other)
+    {
+        isInteract = false;
     }
 
     public void InteractWith(string tagCase)
@@ -109,17 +119,79 @@ public class playerManager : MonoBehaviour
                 break;
 
             case "ingrediente 1":
-                print("estoy preparando el pedido");
+                Id = 1;
+                series[0] = true;
+                series[1] = false;
+                series[2] = false;
+                CreatingRecipe(series[0], series[1], series[2], index);
+                index += 1;
                 break;
 
             case "ingrediente 2":
-
+                Id = 2;
+                series[0] = false;
+                series[1] = true;
+                series[2] = false;
+                CreatingRecipe(series[0], series[1], series[2], index);
+                index += 1;
                 break;
 
             case "ingrediente 3":
-
+                Id = 3;
+                series[0] = false;
+                series[1] = false;
+                series[2] = true;
+                CreatingRecipe(series[0], series[1], series[2], index);
+                index += 1;
                 break;
         }
+    }
+
+    public void CreatingRecipe(bool first, bool second, bool third, int indicator)
+    {
+        switch (first, second, third, indicator)
+        {
+            case (true, false, false, 0):            
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, true, false, 0):
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, false, true, 0):
+                IdSecuence[indicator] = Id;
+                break;
+
+            case (true, false, false, 1):
+
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, true, false, 1):
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, false, true, 1):
+                IdSecuence[indicator] = Id;
+                break;
+
+            case (true, false, false, 2):
+
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, true, false, 2):
+                IdSecuence[indicator] = Id;
+                break;
+            case (false, false, true, 2):
+                IdSecuence[indicator] = Id;
+                break;
+        }
+
+        //for (int i = 0; i < IdSecuence.Length; i ++)
+        //{
+        //    if (IdSecuence[i] == Id)
+        //    {
+        //        IdSecuence[i + 1] = 0;
+        //    }
+                
+        //}
     }
 
     #endregion
