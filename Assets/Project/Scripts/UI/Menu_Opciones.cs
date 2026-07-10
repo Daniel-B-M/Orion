@@ -3,19 +3,30 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
+using TMPro;
+using UnityEngine.UI;
 
 public class Menu_Opciones : MonoBehaviour
 {
 
-    [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] public AudioMixer AudioMixer;
+    public Slider masterVol, musicVol, sfxVol; 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void PantallaCompleta(bool PantallaCompleta)
     {
         Screen.fullScreen = PantallaCompleta;
     }
 
-    public void CambiarVolumen(float volumen)
+    public void ChangeMasterVolumne()
     {
-        audioMixer.SetFloat("Volumen", volumen);
+        AudioMixer.SetFloat("MasterVol", masterVol.value);
+    }
+     public void ChangeMusicVolumne()
+    {
+        AudioMixer.SetFloat("Music", musicVol.value);
+    }
+     public void ChangeSfxVolumne()
+    {
+        AudioMixer.SetFloat("SFXVol", sfxVol.value);
     }
 }
