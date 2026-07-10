@@ -24,7 +24,7 @@ public class MixManger : MonoBehaviour
         public int[] ingredientsIds;
         public string resultName;
     }
-    [SerializeField] private List<Recipe> recipes;
+    public List<Recipe> recipes;
 
     // Objeto que se devuelve como resultado de una mezcla: categoría + nombre.
     // Se crea en tiempo de ejecución, no se edita en el Inspector.

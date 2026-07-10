@@ -8,7 +8,7 @@ public class Customer : MonoBehaviour
     [SerializeField] private float waitingTimeExtraMin = 1f;
     [SerializeField] private float waitingTimeExtraMax = 10f;
     [SerializeField] private float consumingTime = 3f;
-    [SerializeField] private bool lastOrderWasCorrect;
+    [SerializeField] private OrderResult resultState;
     [SerializeField] private CustomerState currentState;
     private Coroutine patienceCoroutine;
     private NavMeshAgent agent;
@@ -16,6 +16,11 @@ public class Customer : MonoBehaviour
     [SerializeField] private Transform doorTransform;
     private Animator animator;
     [SerializeField] private float sitHeightOffset = -0.3f;
+    [SerializeField] private GameObject satisfiedVfx;
+    [SerializeField] private GameObject unsatisfiedVfx;
+    [SerializeField] private GameObject sickVfx;
+    [SerializeField] private GameObject impatientVfx;
+    [SerializeField] private Transform vfxSpawnPoint;
     [SerializeField] private string orderName; //Reemplazar cuando se integre el sistema de recetas
 
     private void Awake()
@@ -49,6 +54,13 @@ public class Customer : MonoBehaviour
         Leaving
     }
 
+    public enum OrderResult
+    {
+        Satisfied,
+        Unsatisfied,
+        Sick
+    }
+
     public void Initialize(Seat seat, Transform door)
     {
         assignedSeat = seat;
@@ -67,6 +79,7 @@ public class Customer : MonoBehaviour
         yield return new WaitForSeconds(waitingTimeBase);
         float extraTime = Random.Range(waitingTimeExtraMin, waitingTimeExtraMax);
         yield return new WaitForSeconds(extraTime);
+        SpawnVFX(impatientVfx);
 
         assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
@@ -76,11 +89,11 @@ public class Customer : MonoBehaviour
         animator.SetTrigger("sitStandUp");
     }   
 
-    public void ReceiveOrder(bool wasCorrect)
+    public void ReceiveOrder(OrderResult result)
     {
         if (currentState != CustomerState.Waiting) return;
         StopCoroutine(patienceCoroutine);
-        lastOrderWasCorrect = wasCorrect;
+        resultState = result;
         currentState = CustomerState.Consuming;
         StartCoroutine(ConsumeOrder());
     }
@@ -88,14 +101,19 @@ public class Customer : MonoBehaviour
     private IEnumerator ConsumeOrder()
     {
         yield return new WaitForSeconds(consumingTime);
-        if (lastOrderWasCorrect)
+        if (resultState == OrderResult.Satisfied)
         {
-            // TODO: sonido/efecto de satisfacción + avisar ScoreManager (pagar dinero)
+            SpawnVFX(satisfiedVfx);
         }
-        else
+        else if (resultState == OrderResult.Unsatisfied)
         {
-            // TODO: sonido/efecto de enfermedad/insatisfacción + avisar ScoreManager (restar dinero)
+            SpawnVFX(unsatisfiedVfx);
         }
+        else if (resultState == OrderResult.Sick)
+        {
+            SpawnVFX(sickVfx);
+        }
+        
         assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
         agent.updatePosition = true;
@@ -103,4 +121,13 @@ public class Customer : MonoBehaviour
         agent.SetDestination(doorTransform.position);
         animator.SetTrigger("sitStandUp");
     }
+
+    private void SpawnVFX(GameObject vfxPrefab)
+    {
+        if (vfxPrefab == null || vfxSpawnPoint == null) return;
+        GameObject instance = Instantiate(vfxPrefab, vfxSpawnPoint.position, Quaternion.identity);
+        instance.transform.SetParent(vfxSpawnPoint);
+        Destroy(instance, 2f); // Destruye despues de 2s
+    }
+        
 }

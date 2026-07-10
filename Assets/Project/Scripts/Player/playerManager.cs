@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,6 +22,13 @@ public class playerManager : MonoBehaviour
     [Tooltip("cuanto mas alto el valor mas rapido se mueve el jugador, cuanto mas bajo el valor mas lento se mueve el jugador")]
     [SerializeField] private float playerSpeed;
     private Rigidbody rb;
+    private Animator animator;
+    private Quaternion initialRotation;
+    [SerializeField] private List<int> collectedIngredients = new List<int>();
+
+    private MixManger mixManager;
+    private MixManger.MixOutcome currentDrink;
+    [SerializeField] private bool isDrinking;
 
     #endregion
 
@@ -28,11 +36,7 @@ public class playerManager : MonoBehaviour
 
     [SerializeField] private string playerInteractionTag;
     [SerializeField] private bool isInteract;
-    [SerializeField] private bool[] series;
-    [SerializeField] private int Id, index;
-    public int[] IdSecuence;
-
-    private MixManger.Recipe ingredient;
+    private Customer currentCustomer;
 
     #endregion
 
@@ -63,6 +67,11 @@ public class playerManager : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponentInChildren<Animator>();
+        initialRotation = transform.rotation;
+
+        mixManager = FindFirstObjectByType<MixManger>();
+
     }
     
     void Update()
@@ -71,7 +80,25 @@ public class playerManager : MonoBehaviour
 
         if (isInteract && playerInputs.Player.Interact.WasPressedThisFrame())
         {
+            if (animator != null)
+            {
+                animator.SetTrigger("Action");
+            }
             InteractWith(playerInteractionTag);
+        }
+        UpdateAnimations();
+    }
+
+    private void UpdateAnimations()
+    {
+        if (animator != null)
+        {
+            float speed = inputMovement.magnitude;
+            if (speed > 0.1f)
+            {
+                Debug.Log($"Input magnitude (Speed): {speed}");
+            }
+            animator.SetFloat("Speed", speed);
         }
     }
 
@@ -86,11 +113,17 @@ public class playerManager : MonoBehaviour
 
     void Movement()
     {
-        //Vector3 direction = new Vector3(inputMovement.x, 0f, inputMovement.y);
-        //transform.Translate(direction * playerSpeed * Time.deltaTime, Space.World);
-
-        Vector3 direction = (transform.forward * inputMovement.y + transform.right * inputMovement.x).normalized;
-        rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
+        Vector3 inputDir = new Vector3(inputMovement.x, 0, inputMovement.y);
+        Vector3 direction = (initialRotation * inputDir).normalized;
+        direction.y = 0f; // Asegurarse de que la dirección no tenga componente vertical
+        direction.Normalize();
+        
+        if (direction.magnitude > 0.1f)
+        {
+            rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 15f * Time.fixedDeltaTime));
+        }
     }
 
     #endregion
@@ -101,11 +134,26 @@ public class playerManager : MonoBehaviour
     {
         isInteract = true;
         playerInteractionTag = other.tag;
+
+        if (other.CompareTag("cliente"))
+        {
+            currentCustomer = other.GetComponent<Customer>();
+
+            if(currentCustomer == null)
+            {
+                currentCustomer = other.GetComponentInParent<Customer>();
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         isInteract = false;
+
+        if (other.CompareTag("cliente"))
+        {
+            currentCustomer = null;
+        }
         //playerInteractionTag = "";
     }
 
@@ -114,78 +162,75 @@ public class playerManager : MonoBehaviour
         switch (tagCase)
         {
             case "cliente":
-                print("que se le ofrece");
+                GiveDrink();
                 break;
 
             case "mezclar":
-                print("estoy cocinando");
+                MixingRecipe();
                 break;
 
             case "ingrediente 1":
-                //ingredient.ingredientsIds/
-                Id = 1;
-                series[0] = true;
-                series[1] = false;
-                series[2] = false;
-                CreatingRecipe(series[0], series[1], series[2], index);
-                index += 1;
+                AddIngredient(1);
                 break;
 
             case "ingrediente 2":
-                Id = 2;
-                series[0] = false;
-                series[1] = true;
-                series[2] = false;
-                CreatingRecipe(series[0], series[1], series[2], index);
-                index += 1;
+                AddIngredient(2);
                 break;
 
             case "ingrediente 3":
-                Id = 3;
-                series[0] = false;
-                series[1] = false;
-                series[2] = true;
-                CreatingRecipe(series[0], series[1], series[2], index);
-                index += 1;
+                AddIngredient(3);
+                break;
+            case "ingrediente 4":
+                AddIngredient(4);
                 break;
         }
     }
 
-    public void CreatingRecipe(bool first, bool second, bool third, int indicator)
+    public void GiveDrink()
     {
-        switch (first, second, third, indicator)
+        if (currentCustomer != null)
         {
-            case (true, false, false, 0):            
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, true, false, 0):
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, false, true, 0):
-                IdSecuence[indicator] = Id;
-                break;
+            //Customer.OrderResult result;
+        }
+    }
 
-            case (true, false, false, 1):
+    public void MixingRecipe()
+    {
+        if (collectedIngredients.Count == 3)
+        {
+            if (mixManager != null)
+            {
+                currentDrink = mixManager.GetMixResult(collectedIngredients.ToArray());
+                isDrinking = true;
+                collectedIngredients.Clear();
+                print("se mezclo bien");
+            }
+            else
+            {
+                Debug.LogError("No se encontro MixManager");
+            }
+        }
+        else
+        {
+            Debug.Log("Se necesitan al menos 3 ingredientes");
+        }
+    }
 
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, true, false, 1):
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, false, true, 1):
-                IdSecuence[indicator] = Id;
-                break;
+    private void AddIngredient(int ingredientId)
+    {
+        if (collectedIngredients.Count < 3)
+        {
+            collectedIngredients.Add(ingredientId);
+            Debug.Log($"Ingrediente {ingredientId} recolectado. Total: {collectedIngredients.Count}/3");
 
-            case (true, false, false, 2):
-
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, true, false, 2):
-                IdSecuence[indicator] = Id;
-                break;
-            case (false, false, true, 2):
-                IdSecuence[indicator] = Id;
-                break;
+            if (collectedIngredients.Count == 3)
+            {
+                Debug.Log("¡Ya tienes 3 ingredientes! Ve a mezclarlos!.");
+            }
+        }
+        else
+        {
+            Debug.Log("¡No puedes llevar mas ingredientes!.");
         }
     }
 
