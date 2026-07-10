@@ -14,11 +14,14 @@ public class Customer : MonoBehaviour
     private NavMeshAgent agent;
     [SerializeField] private Seat assignedSeat;
     [SerializeField] private Transform doorTransform;
+    private Animator animator;
+    [SerializeField] private float sitHeightOffset = -0.3f;
     [SerializeField] private string orderName; //Reemplazar cuando se integre el sistema de recetas
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -27,6 +30,10 @@ public class Customer : MonoBehaviour
         {
             currentState = CustomerState.Waiting;
             patienceCoroutine = StartCoroutine(PatienceCountdown());
+            transform.rotation = assignedSeat.transform.rotation;
+            transform.position = assignedSeat.transform.position + new Vector3(0, sitHeightOffset, 0);
+            agent.updatePosition = false;
+            animator.SetTrigger("sitDown");
         }
         if (currentState == CustomerState.Leaving && HasReachedDestination())
         {
@@ -63,7 +70,10 @@ public class Customer : MonoBehaviour
 
         assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
+        agent.updatePosition = true;
+        agent.Warp(transform.position);
         agent.SetDestination(doorTransform.position);
+        animator.SetTrigger("sitStandUp");
     }   
 
     public void ReceiveOrder(bool wasCorrect)
@@ -88,6 +98,9 @@ public class Customer : MonoBehaviour
         }
         assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
+        agent.updatePosition = true;
+        agent.Warp(transform.position);
         agent.SetDestination(doorTransform.position);
+        animator.SetTrigger("sitStandUp");
     }
 }

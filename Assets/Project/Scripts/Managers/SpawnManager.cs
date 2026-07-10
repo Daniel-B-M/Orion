@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class SpawnManager : MonoBehaviour
 {
-    [SerializeField] private GameObject customerPrefab;
+    [SerializeField] private GameObject[] customerPrefabs;
     [SerializeField] private Seat[] seats;
     [SerializeField] private Transform doorTransform;
     [SerializeField] private float spawnIntervalMin = 2f;
@@ -33,7 +33,7 @@ public class SpawnManager : MonoBehaviour
         int randomIndex = Random.Range(0, freeSeats.Count);
         Seat availableSeat = freeSeats[randomIndex];
 
-        GameObject newCustomer = Instantiate(customerPrefab, doorTransform.position, Quaternion.identity);
+        GameObject newCustomer = Instantiate(customerPrefabs[Random.Range(0, customerPrefabs.Length)], doorTransform.position, Quaternion.identity);
         Customer customerScript = newCustomer.GetComponent<Customer>();
         availableSeat.OccupySeat(customerScript);
         customerScript.Initialize(availableSeat, doorTransform);

@@ -26,7 +26,9 @@ public class playerManager : MonoBehaviour
 
     #region Variables de interaccion del jugador
 
-    private string playerInteractionTag;
+    [SerializeField] private string playerInteractionTag;
+    private MixManger.Recipe ingredient;
+    [SerializeField] private bool isInteract;
 
     #endregion
 
@@ -62,6 +64,11 @@ public class playerManager : MonoBehaviour
     void Update()
     {
         inputMovement = playerInputs.Player.Move.ReadValue<Vector2>();
+
+        if (isInteract && playerInputs.Player.Interact.WasPressedThisFrame())
+        {
+            InteractWith(playerInteractionTag);
+        }
     }
 
     private void FixedUpdate()
@@ -86,14 +93,16 @@ public class playerManager : MonoBehaviour
 
     #region Funciones de interaccion del jugador
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
+        isInteract = true;
         playerInteractionTag = other.tag;
+    }
 
-        if (other.CompareTag(playerInteractionTag) && playerInputs.Player.Interact.WasPressedThisFrame())
-        {
-            InteractWith(playerInteractionTag);
-        }
+    private void OnTriggerExit(Collider other)
+    {
+        isInteract = false;
+        //playerInteractionTag = "";
     }
 
     public void InteractWith(string tagCase)
@@ -109,15 +118,16 @@ public class playerManager : MonoBehaviour
                 break;
 
             case "ingrediente 1":
-                print("estoy preparando el pedido");
+                //ingredient.ingredientsIds/
+                print("ingrediente 1");
                 break;
 
             case "ingrediente 2":
-
+                print("ingrediente 2");
                 break;
 
             case "ingrediente 3":
-
+                print("ingrediente 3");
                 break;
         }
     }
