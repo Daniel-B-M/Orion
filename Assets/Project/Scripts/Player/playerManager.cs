@@ -1,49 +1,35 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class playerManager : MonoBehaviour
 {
-    #region Variables
-
-    #region Variables del input,controles del jugador
-
+    // --- Input ---
     private PlayerController playerInputs;
     private Vector2 inputMovement;
 
-    #endregion
-
-    #region Variables de movimiento del jugador
-
-    [Header("Variables del jugador")]
-    [Space(5)]
-
-
-    [Tooltip("cuanto mas alto el valor mas rapido se mueve el jugador, cuanto mas bajo el valor mas lento se mueve el jugador")]
+    // --- Movimiento ---
     [SerializeField] private float playerSpeed;
     private Rigidbody rb;
     private Animator animator;
     private Quaternion initialRotation;
 
-    #endregion
+    // --- Mezclas / ingredientes ---
+    [SerializeField] private List<int> collectedIngredients = new List<int>();
+    private MixManager mixManager;
+    private MixManager.MixOutcome currentDrink;
+    [SerializeField] private bool isDrinking;
 
-    #region Variables de interaccion del jugador
-
+    // --- Interacción con el entorno ---
     [SerializeField] private string playerInteractionTag;
-    private MixManger.Recipe ingredient;
     [SerializeField] private bool isInteract;
-
-    #endregion
-
-    #endregion
-
-    #region Funciones
-
-    #region Funciones del input, controles del jugador
+    private Customer currentCustomer;
 
     private void Awake()
     {
         playerInputs = new PlayerController();
     }
+
     private void OnEnable()
     {
         playerInputs.Enable();
@@ -54,17 +40,15 @@ public class playerManager : MonoBehaviour
         playerInputs.Disable();
     }
 
-    #endregion
-
-    #region Funciones generales
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponentInChildren<Animator>();
         initialRotation = transform.rotation;
+
+        mixManager = FindFirstObjectByType<MixManager>();
     }
-    
+
     void Update()
     {
         inputMovement = playerInputs.Player.Move.ReadValue<Vector2>();
@@ -77,13 +61,8 @@ public class playerManager : MonoBehaviour
             }
             InteractWith(playerInteractionTag);
         }
-        UpdateAnimations();
-    }
 
-    private void UpdateAnimations()
-    {
-        float speed = inputMovement.magnitude;
-        animator.SetFloat("Speed", speed);
+        UpdateAnimations();
     }
 
     private void FixedUpdate()
@@ -91,17 +70,24 @@ public class playerManager : MonoBehaviour
         Movement();
     }
 
-    #endregion
+    // Actualiza el parámetro de velocidad del Animator según el input actual.
+    private void UpdateAnimations()
+    {
+        if (animator != null)
+        {
+            float speed = inputMovement.magnitude;
+            animator.SetFloat("Speed", speed);
+        }
+    }
 
-    #region Funciones de movimiento del jugador
-
+    // Mueve y rota al jugador según el input, relativo a su rotación inicial.
     void Movement()
     {
         Vector3 inputDir = new Vector3(inputMovement.x, 0, inputMovement.y);
         Vector3 direction = (initialRotation * inputDir).normalized;
         direction.y = 0f; // Asegurarse de que la dirección no tenga componente vertical
         direction.Normalize();
-        
+
         if (direction.magnitude > 0.1f)
         {
             rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
@@ -110,50 +96,132 @@ public class playerManager : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Funciones de interaccion del jugador
+    // --- Detección de interacción (trigger + tag) ---
 
     private void OnTriggerEnter(Collider other)
     {
         isInteract = true;
         playerInteractionTag = other.tag;
+
+        if (other.CompareTag("Customer"))
+        {
+            currentCustomer = other.GetComponent<Customer>();
+
+            if (currentCustomer == null)
+            {
+                currentCustomer = other.GetComponentInParent<Customer>();
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         isInteract = false;
-        //playerInteractionTag = "";
+
+        if (other.CompareTag("Customer"))
+        {
+            currentCustomer = null;
+        }
     }
 
+    // Decide qué acción tomar según el tag del objeto con el que se interactúa.
     public void InteractWith(string tagCase)
     {
         switch (tagCase)
         {
-            case "cliente":
-                print("que se le ofrece");
+            case "Customer":
+                GiveDrink();
                 break;
 
-            case "mezclar":
-                print("estoy cocinando");
+            case "Blend":
+                MixingRecipe();
                 break;
 
-            case "ingrediente 1":
-                //ingredient.ingredientsIds/
-                print("ingrediente 1");
+            case "IngredientOne":
+                AddIngredient(1);
                 break;
 
-            case "ingrediente 2":
-                print("ingrediente 2");
+            case "IngredientTwo":
+                AddIngredient(2);
                 break;
 
-            case "ingrediente 3":
-                print("ingrediente 3");
+            case "IngredientThree":
+                AddIngredient(3);
+                break;
+
+            case "IngredientFour":
+                AddIngredient(4);
                 break;
         }
     }
 
-    #endregion
+    // TODO: entregar currentDrink al currentCustomer (traducir MixResult -> Customer.OrderResult)
+    public void GiveDrink()
+    {
+        if (currentCustomer == null) return;
+        
+        if (!isDrinking) return;
 
-    #endregion
+        Customer.OrderResult translatedResult = TranslateResult(currentDrink.result);
+        currentCustomer.ReceiveOrder(translatedResult);
+        Debug.Log($"Pedido entregado: {translatedResult}");
+
+        isDrinking = false;
+        currentDrink = null;
+    }
+
+    // Si ya hay 3 ingredientes juntados, calcula el resultado de la mezcla.
+    public void MixingRecipe()
+    {
+        if (collectedIngredients.Count == 3)
+        {
+            if (mixManager != null)
+            {
+                currentDrink = mixManager.GetMixResult(collectedIngredients.ToArray());
+                isDrinking = true;
+                collectedIngredients.Clear();
+                print("se mezclo bien");
+            }
+            else
+            {
+                Debug.LogError("No se encontro MixManager");
+            }
+        }
+        else
+        {
+            Debug.Log("Se necesitan al menos 3 ingredientes");
+        }
+    }
+
+    // Agrega un ingrediente a la mezcla en curso (máximo 3 a la vez).
+    private void AddIngredient(int ingredientId)
+    {
+        if (collectedIngredients.Count < 3)
+        {
+            collectedIngredients.Add(ingredientId);
+            Debug.Log($"Ingrediente {ingredientId} recolectado. Total: {collectedIngredients.Count}/3");
+
+            if (collectedIngredients.Count == 3)
+            {
+                Debug.Log("¡Ya tienes 3 ingredientes! Ve a mezclarlos!.");
+            }
+        }
+        else
+        {
+            Debug.Log("¡No puedes llevar mas ingredientes!.");
+        }
+    }
+
+    private Customer.OrderResult TranslateResult(MixManager.MixResult mixResult)
+    {
+        switch (mixResult)
+        {
+            case MixManager.MixResult.Success:
+                return Customer.OrderResult.Satisfied;
+            case MixManager.MixResult.CriticalFail:
+                return Customer.OrderResult.Sick;
+            default:
+                return Customer.OrderResult.Unsatisfied;
+        }
+    }   
 }

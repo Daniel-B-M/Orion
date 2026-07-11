@@ -21,7 +21,8 @@ public class Customer : MonoBehaviour
     [SerializeField] private GameObject sickVfx;
     [SerializeField] private GameObject impatientVfx;
     [SerializeField] private Transform vfxSpawnPoint;
-    [SerializeField] private string orderName; //Reemplazar cuando se integre el sistema de recetas
+    [SerializeField] private MixManager.Recipe desiredRecipe;
+    [SerializeField] private SpriteRenderer orderIconRenderer;
 
     private void Awake()
     {
@@ -80,6 +81,7 @@ public class Customer : MonoBehaviour
         float extraTime = Random.Range(waitingTimeExtraMin, waitingTimeExtraMax);
         yield return new WaitForSeconds(extraTime);
         SpawnVFX(impatientVfx);
+        orderIconRenderer.sprite = null;
 
         assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
@@ -104,17 +106,19 @@ public class Customer : MonoBehaviour
         if (resultState == OrderResult.Satisfied)
         {
             SpawnVFX(satisfiedVfx);
+            orderIconRenderer.sprite = null;
         }
         else if (resultState == OrderResult.Unsatisfied)
         {
             SpawnVFX(unsatisfiedVfx);
+            orderIconRenderer.sprite = null;
         }
         else if (resultState == OrderResult.Sick)
         {
             SpawnVFX(sickVfx);
+            orderIconRenderer.sprite = null;
         }
         
-        assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
         agent.updatePosition = true;
         agent.Warp(transform.position);
@@ -129,5 +133,10 @@ public class Customer : MonoBehaviour
         instance.transform.SetParent(vfxSpawnPoint);
         Destroy(instance, 2f); // Destruye despues de 2s
     }
-        
+
+    public void SetDesiredRecipe(MixManager.Recipe recipe)
+    {
+        desiredRecipe = recipe;
+        orderIconRenderer.sprite = recipe.icon;
+    }  
 }

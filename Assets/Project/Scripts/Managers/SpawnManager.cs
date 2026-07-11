@@ -10,11 +10,13 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private Transform doorTransform;
     [SerializeField] private float spawnIntervalMin = 2f;
     [SerializeField] private float spawnIntervalMax = 6f;
+    private MixManager mixManager;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     
     private void Start()
     {
+        mixManager = FindFirstObjectByType<MixManager>();
         StartCoroutine(SpawnRutine());
     }
     private void SpawnCustomer()
@@ -37,6 +39,8 @@ public class SpawnManager : MonoBehaviour
         Customer customerScript = newCustomer.GetComponent<Customer>();
         availableSeat.OccupySeat(customerScript);
         customerScript.Initialize(availableSeat, doorTransform);
+        MixManager.Recipe randomRecipe = mixManager.GetRandomRecipe();
+        customerScript.SetDesiredRecipe(randomRecipe);
     }
 
     private IEnumerator SpawnRutine()

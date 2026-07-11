@@ -4,9 +4,12 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - cliente
-  - mezclar
-  - ingrediente 1
+  - IngredientOne
+  - IngredientTwo
+  - IngredientThree
+  - Customer
+  - Blend
+  - IngredientFour
   layers:
   - Default
   - TransparentFX
