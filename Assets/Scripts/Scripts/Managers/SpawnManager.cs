@@ -1,0 +1,55 @@
+using System.Collections;
+using UnityEngine;
+using System.Collections.Generic;
+
+
+public class SpawnManager : MonoBehaviour
+{
+    [SerializeField] private GameObject[] customerPrefabs;
+    [SerializeField] private Seat[] seats;
+    [SerializeField] private Transform doorTransform;
+    [SerializeField] private float spawnIntervalMin = 2f;
+    [SerializeField] private float spawnIntervalMax = 6f;
+    private MixManager mixManager;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    private void Start()
+    {
+        mixManager = FindFirstObjectByType<MixManager>();
+        StartCoroutine(SpawnRutine());
+    }
+    private void SpawnCustomer()
+    {
+        List<Seat> freeSeats = new List<Seat>();
+        foreach (Seat seat in seats)
+        {
+            if (!seat.IsOccupied)
+            {
+                freeSeats.Add(seat);
+            }
+        }
+        
+        if (freeSeats.Count == 0) return; // No free seats available
+        
+        int randomIndex = Random.Range(0, freeSeats.Count);
+        Seat availableSeat = freeSeats[randomIndex];
+
+        GameObject newCustomer = Instantiate(customerPrefabs[Random.Range(0, customerPrefabs.Length)], doorTransform.position, Quaternion.identity);
+        Customer customerScript = newCustomer.GetComponent<Customer>();
+        availableSeat.OccupySeat(customerScript);
+        customerScript.Initialize(availableSeat, doorTransform);
+        MixManager.Recipe randomRecipe = mixManager.GetRandomRecipe();
+        customerScript.SetDesiredRecipe(randomRecipe);
+    }
+
+    private IEnumerator SpawnRutine()
+    {
+        while (true)
+        {
+            float waitTime = Random.Range(spawnIntervalMin, spawnIntervalMax);
+            yield return new WaitForSeconds(waitTime);
+            SpawnCustomer();
+        }
+    }
+}

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c833f99872a74204e95ef4823ab12f1b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - assignedSeat: {instanceID: 0}
+  - doorTransform: {instanceID: 0}
+  - satisfiedVfx: {fileID: 6584087812303370333, guid: d3791cec7c55fef43b3bce7ee3c85ee3, type: 3}
+  - unsatisfiedVfx: {fileID: 6584087812303370333, guid: 27fec2bbe7baab348b19955639591ced, type: 3}
+  - sickVfx: {fileID: 6584087812303370333, guid: a9224f4a7308f9647b4b83b392b1c1f7, type: 3}
+  - impatientVfx: {fileID: 6584087812303370333, guid: 4ac3b5dcd0ce53b4eaefeeef62e8ea1f, type: 3}
+  - vfxSpawnPoint: {instanceID: 0}
+  - orderIconRenderer: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
