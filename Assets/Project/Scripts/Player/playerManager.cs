@@ -24,6 +24,10 @@ public class playerManager : MonoBehaviour
     // --- Interacción con el entorno ---
     [SerializeField] private string playerInteractionTag;
     [SerializeField] private bool isInteract;
+    [SerializeField] private LayerMask interactableLayer;
+    [SerializeField] private float interactRadius = 0.5f;
+    [SerializeField] private float interactDistance = 1.5f;
+    [SerializeField] private float interactHeightOffset = 1f;
     private Customer currentCustomer;
 
     private void Awake()
@@ -64,6 +68,7 @@ public class playerManager : MonoBehaviour
         }
 
         UpdateAnimations();
+        CheckInteractable();
     }
 
     private void FixedUpdate()
@@ -94,34 +99,6 @@ public class playerManager : MonoBehaviour
             rb.MovePosition(rb.position + direction * playerSpeed * Time.fixedDeltaTime);
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 15f * Time.fixedDeltaTime));
-        }
-    }
-
-    // --- Detección de interacción (trigger + tag) ---
-
-    private void OnTriggerEnter(Collider other)
-    {
-        isInteract = true;
-        playerInteractionTag = other.tag;
-
-        if (other.CompareTag("Customer"))
-        {
-            currentCustomer = other.GetComponent<Customer>();
-
-            if (currentCustomer == null)
-            {
-                currentCustomer = other.GetComponentInParent<Customer>();
-            }
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        isInteract = false;
-
-        if (other.CompareTag("Customer"))
-        {
-            currentCustomer = null;
         }
     }
 
@@ -223,6 +200,33 @@ public class playerManager : MonoBehaviour
                 return Customer.OrderResult.Sick;
             default:
                 return Customer.OrderResult.Unsatisfied;
+        }
+    }
+
+    private void CheckInteractable()
+    {
+        RaycastHit hitInfo;
+        Vector3 rayOrigin = transform.position + Vector3.up * interactHeightOffset;
+        bool didHit = Physics.SphereCast(rayOrigin, interactRadius, transform.forward, out hitInfo, interactDistance, interactableLayer);
+        Debug.DrawRay(rayOrigin, transform.forward * interactDistance, didHit ? Color.green : Color.red);
+
+        if (didHit)
+        {
+            isInteract = true;
+            playerInteractionTag = hitInfo.collider.tag;
+            if (hitInfo.collider.CompareTag("Customer"))
+            {
+                currentCustomer = hitInfo.collider.GetComponent<Customer>();
+                if (currentCustomer == null)
+                {
+                    currentCustomer = hitInfo.collider.GetComponentInParent<Customer>();
+                }    
+            }
+        }    
+        else
+        {
+            isInteract = false;
+            playerInteractionTag = "";  
         }
     }   
 }
