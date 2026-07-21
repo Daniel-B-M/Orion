@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,7 +20,7 @@ public class playerManager : MonoBehaviour
     [SerializeField] private List<int> collectedIngredients = new List<int>();
     private MixManager mixManager;
     private MixManager.MixOutcome currentDrink;
-    [SerializeField] private bool isDrinking;
+    [SerializeField] private bool hasMixedDrink;
 
     // --- Interacción con el entorno ---
     [SerializeField] private string playerInteractionTag;
@@ -28,6 +29,8 @@ public class playerManager : MonoBehaviour
     [SerializeField] private float interactRadius = 0.5f;
     [SerializeField] private float interactDistance = 1.5f;
     [SerializeField] private float interactHeightOffset = 1f;
+    [SerializeField] private TextMeshPro interactionText;
+    [SerializeField] private TextMeshPro mixProgressText;
     private Customer currentCustomer;
 
     private void Awake()
@@ -69,6 +72,7 @@ public class playerManager : MonoBehaviour
 
         UpdateAnimations();
         CheckInteractable();
+        UpdateMixProgress();
     }
 
     private void FixedUpdate()
@@ -138,13 +142,13 @@ public class playerManager : MonoBehaviour
     {
         if (currentCustomer == null) return;
         
-        if (!isDrinking) return;
+        if (!hasMixedDrink) return;
 
         Customer.OrderResult translatedResult = TranslateResult(currentDrink.result);
         currentCustomer.ReceiveOrder(translatedResult);
         Debug.Log($"Pedido entregado: {translatedResult}");
 
-        isDrinking = false;
+        hasMixedDrink = false;
         currentDrink = null;
     }
 
@@ -156,7 +160,7 @@ public class playerManager : MonoBehaviour
             if (mixManager != null)
             {
                 currentDrink = mixManager.GetMixResult(collectedIngredients.ToArray());
-                isDrinking = true;
+                hasMixedDrink = true;
                 collectedIngredients.Clear();
                 print("se mezclo bien");
             }
@@ -214,6 +218,7 @@ public class playerManager : MonoBehaviour
         {
             isInteract = true;
             playerInteractionTag = hitInfo.collider.tag;
+
             if (hitInfo.collider.CompareTag("Customer"))
             {
                 currentCustomer = hitInfo.collider.GetComponent<Customer>();
@@ -228,5 +233,74 @@ public class playerManager : MonoBehaviour
             isInteract = false;
             playerInteractionTag = "";  
         }
-    }   
+
+        UpdateInteractionText(hitInfo, didHit);
+    }  
+
+    private void UpdateInteractionText(RaycastHit hitInfo, bool didHit)
+    {
+        if (!didHit)
+        {
+            interactionText.gameObject.SetActive(false);
+            return;
+        }
+
+        interactionText.gameObject.SetActive(true);
+        interactionText.transform.position = hitInfo.collider.transform.position + Vector3.up * 1f; // Ajusta la altura del texto según sea necesario
+
+        Vector3 directionToCamera = Camera.main.transform.position - interactionText.transform.position;
+        directionToCamera.y = 0f;
+        interactionText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
+
+        switch (hitInfo.collider.tag)
+        {
+            case "IngredientOne":
+                interactionText.text = "Ingredient 1";
+                break;
+
+            case "IngredientTwo":
+                interactionText.text = "Ingredient 2";
+                break;
+
+            case "IngredientThree":
+                interactionText.text = "Ingredient 3";
+                break;
+                
+            case "IngredientFour":
+                interactionText.text = "Ingredient 4";
+                break;
+            
+            default:
+                interactionText.gameObject.SetActive(false);
+                break;
+        }
+    }
+
+    private void UpdateMixProgress()
+    {
+        if (hasMixedDrink)
+        {
+            mixProgressText.gameObject.SetActive(true);
+            mixProgressText.text = "Drink Ready!";
+            return;
+        }
+
+        if (collectedIngredients.Count == 0)
+        {
+            mixProgressText.gameObject.SetActive(false);
+            return;
+        }
+
+        mixProgressText.gameObject.SetActive(true);
+
+        if (collectedIngredients.Count == 3)
+        {
+            mixProgressText.text = "Mix!";
+        }
+        else
+        {
+            mixProgressText.text = $"{collectedIngredients.Count}/3";
+        }
+    }
+    
 }
