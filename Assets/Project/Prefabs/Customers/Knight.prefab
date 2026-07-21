@@ -410,7 +410,7 @@ MonoBehaviour:
   currentState: 0
   assignedSeat: {fileID: 0}
   doorTransform: {fileID: 0}
-  sitHeightOffset: -0.1
+  sitHeightOffset: 0.3
   satisfiedVfx: {fileID: 6584087812303370333, guid: d3791cec7c55fef43b3bce7ee3c85ee3, type: 3}
   unsatisfiedVfx: {fileID: 6584087812303370333, guid: 27fec2bbe7baab348b19955639591ced, type: 3}
   sickVfx: {fileID: 6584087812303370333, guid: a9224f4a7308f9647b4b83b392b1c1f7, type: 3}
@@ -440,5 +440,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.3569795, y: 0.3995657, z: 1.8124747}
-  m_Center: {x: -0.008269337, y: 1.8366653, z: 0.4062365}
+  m_Size: {x: 0.3569795, y: 0.93849427, z: 1.8124747}
+  m_Center: {x: -0.008269337, y: 1.5672023, z: 0.40623653}

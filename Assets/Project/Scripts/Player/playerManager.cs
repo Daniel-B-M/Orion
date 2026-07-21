@@ -246,28 +246,28 @@ public class playerManager : MonoBehaviour
         }
 
         interactionText.gameObject.SetActive(true);
-        interactionText.transform.position = hitInfo.collider.transform.position + Vector3.up * 1f; // Ajusta la altura del texto según sea necesario
+        interactionText.transform.position = hitInfo.collider.transform.position + Vector3.up * 0.8f; // Ajusta la altura del texto según sea necesario
 
-        Vector3 directionToCamera = Camera.main.transform.position - interactionText.transform.position;
-        directionToCamera.y = 0f;
-        interactionText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
+        //Vector3 directionToCamera = Camera.main.transform.position - interactionText.transform.position;
+        //directionToCamera.y = 0f;
+        //interactionText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
 
         switch (hitInfo.collider.tag)
         {
             case "IngredientOne":
-                interactionText.text = "Ingredient 1";
+                interactionText.text = "Yellow";
                 break;
 
             case "IngredientTwo":
-                interactionText.text = "Ingredient 2";
+                interactionText.text = "Red";
                 break;
 
             case "IngredientThree":
-                interactionText.text = "Ingredient 3";
+                interactionText.text = "Blue";
                 break;
                 
             case "IngredientFour":
-                interactionText.text = "Ingredient 4";
+                interactionText.text = "Green";
                 break;
             
             default:
@@ -278,10 +278,16 @@ public class playerManager : MonoBehaviour
 
     private void UpdateMixProgress()
     {
+        mixProgressText.transform.position = transform.position + Vector3.up * 2f;
+
+        Vector3 directionToCamera = Camera.main.transform.position - mixProgressText.transform.position;
+        directionToCamera.y = 0f;
+        mixProgressText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
+
         if (hasMixedDrink)
         {
             mixProgressText.gameObject.SetActive(true);
-            mixProgressText.text = "Drink Ready!";
+            mixProgressText.text = "Ready!";
             return;
         }
 
