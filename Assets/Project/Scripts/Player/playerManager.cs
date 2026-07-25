@@ -77,6 +77,7 @@ public class playerManager : MonoBehaviour
 
     private void FixedUpdate()
     {
+        rb.linearVelocity = Vector3.zero;
         Movement();
     }
 
@@ -146,7 +147,7 @@ public class playerManager : MonoBehaviour
 
         Customer.OrderResult translatedResult = TranslateResult(currentDrink.result);
         currentCustomer.ReceiveOrder(translatedResult);
-        Debug.Log($"Pedido entregado: {translatedResult}");
+        //Debug.Log($"Pedido entregado: {translatedResult}");
 
         hasMixedDrink = false;
         currentDrink = null;
@@ -171,7 +172,7 @@ public class playerManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Se necesitan al menos 3 ingredientes");
+            //Debug.Log("Se necesitan al menos 3 ingredientes");
         }
     }
 
@@ -181,16 +182,16 @@ public class playerManager : MonoBehaviour
         if (collectedIngredients.Count < 3)
         {
             collectedIngredients.Add(ingredientId);
-            Debug.Log($"Ingrediente {ingredientId} recolectado. Total: {collectedIngredients.Count}/3");
+            //Debug.Log($"Ingrediente {ingredientId} recolectado. Total: {collectedIngredients.Count}/3");
 
             if (collectedIngredients.Count == 3)
             {
-                Debug.Log("¡Ya tienes 3 ingredientes! Ve a mezclarlos!.");
+                //Debug.Log("¡Ya tienes 3 ingredientes! Ve a mezclarlos!.");
             }
         }
         else
         {
-            Debug.Log("¡No puedes llevar mas ingredientes!.");
+            //Debug.Log("¡No puedes llevar mas ingredientes!.");
         }
     }
 

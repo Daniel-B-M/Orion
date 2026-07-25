@@ -10,6 +10,7 @@ public class Menu_Pausa : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject pauseButton;
     private bool isPaused = false;
+
     void Update()
     {
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -51,5 +52,9 @@ public class Menu_Pausa : MonoBehaviour
         Application.Quit();
     }
 
-
+    public void GoToMainMenu()
+    {
+        SceneManager.LoadScene("UI");
+        Time.timeScale = 1; 
+    }
 }

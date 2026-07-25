@@ -11,13 +11,14 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private float spawnIntervalMin = 2f;
     [SerializeField] private float spawnIntervalMax = 6f;
     private MixManager mixManager;
+    private Coroutine spawnCoroutine;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     
     private void Start()
     {
         mixManager = FindFirstObjectByType<MixManager>();
-        StartCoroutine(SpawnRutine());
+        spawnCoroutine = StartCoroutine(SpawnRutine());
     }
     private void SpawnCustomer()
     {
@@ -50,6 +51,14 @@ public class SpawnManager : MonoBehaviour
             float waitTime = Random.Range(spawnIntervalMin, spawnIntervalMax);
             yield return new WaitForSeconds(waitTime);
             SpawnCustomer();
+        }
+    }
+
+    public void StopSpawning()
+    {
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
         }
     }
 }

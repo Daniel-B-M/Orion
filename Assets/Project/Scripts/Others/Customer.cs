@@ -81,6 +81,7 @@ public class Customer : MonoBehaviour
         float extraTime = Random.Range(waitingTimeExtraMin, waitingTimeExtraMax);
         yield return new WaitForSeconds(extraTime);
         SpawnVFX(impatientVfx);
+        GameManager.Instance.RegisterBadService();
         orderIconRenderer.sprite = null;
 
         assignedSeat.FreeSeat();
@@ -105,20 +106,24 @@ public class Customer : MonoBehaviour
         yield return new WaitForSeconds(consumingTime);
         if (resultState == OrderResult.Satisfied)
         {
+            GameManager.Instance.RegisterSatisfied();
             SpawnVFX(satisfiedVfx);
             orderIconRenderer.sprite = null;
         }
         else if (resultState == OrderResult.Unsatisfied)
         {
+            GameManager.Instance.RegisterBadService();
             SpawnVFX(unsatisfiedVfx);
             orderIconRenderer.sprite = null;
         }
         else if (resultState == OrderResult.Sick)
         {
+            GameManager.Instance.RegisterSick();
             SpawnVFX(sickVfx);
             orderIconRenderer.sprite = null;
         }
         
+        assignedSeat.FreeSeat();
         currentState = CustomerState.Leaving;
         agent.updatePosition = true;
         agent.Warp(transform.position);
