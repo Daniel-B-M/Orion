@@ -8563,7 +8563,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 203188b3f06dffb4ca14a6d049664757, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  matchDuration: 60
+  matchDuration: 120
   sickLimit: 3
   badServiceLimit: 5
   panelVictory: {fileID: 1801996487}
