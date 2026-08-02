@@ -10,15 +10,24 @@ public class Menu_Pausa : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject pauseButton;
     private bool isPaused = false;
+    [SerializeField] private TutorialManager tutorialManager;
 
     void Update()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            if (isPaused)
+            if (tutorialManager.IsOpen)
+            {
+                tutorialManager.CloseTutorial();
+            }
+            else if (isPaused)
+            {
                 ResumeGame();
+            }
             else
+            {
                 PauseGame();
+            }
         }
     }
   
