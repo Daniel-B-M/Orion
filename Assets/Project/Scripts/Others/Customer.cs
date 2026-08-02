@@ -136,7 +136,7 @@ public class Customer : MonoBehaviour
         if (vfxPrefab == null || vfxSpawnPoint == null) return;
         GameObject instance = Instantiate(vfxPrefab, vfxSpawnPoint.position, Quaternion.identity);
         instance.transform.SetParent(vfxSpawnPoint);
-        Destroy(instance, 2f); // Destruye despues de 2s
+        Destroy(instance, 2f); // Destroy after 2s
     }
 
     public void SetDesiredRecipe(MixManager.Recipe recipe)

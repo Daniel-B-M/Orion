@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,21 +9,21 @@ public class playerManager : MonoBehaviour
     // --- Input ---
     private PlayerController playerInputs;
     private Vector2 inputMovement;
-    
 
-    // --- Movimiento ---
+    // --- Movement ---
     [SerializeField] private float playerSpeed;
     private Rigidbody rb;
     private Animator animator;
     private Quaternion initialRotation;
 
-    // --- Mezclas / ingredientes ---
+    // --- Mixing / ingredients ---
     [SerializeField] private List<int> collectedIngredients = new List<int>();
     private MixManager mixManager;
     private MixManager.MixOutcome currentDrink;
     [SerializeField] private bool hasMixedDrink;
+    private bool showingDeliveredMessage;
 
-    // --- Interacción con el entorno ---
+    // --- Environment interaction ---
     [SerializeField] private string playerInteractionTag;
     [SerializeField] private bool isInteract;
     [SerializeField] private LayerMask interactableLayer;
@@ -81,7 +82,7 @@ public class playerManager : MonoBehaviour
         Movement();
     }
 
-    // Actualiza el parámetro de velocidad del Animator según el input actual.
+    // Updates the Animator's speed parameter based on the current input.
     private void UpdateAnimations()
     {
         if (animator != null)
@@ -91,12 +92,12 @@ public class playerManager : MonoBehaviour
         }
     }
 
-    // Mueve y rota al jugador según el input, relativo a su rotación inicial.
+    // Moves and rotates the player based on input, relative to its initial rotation.
     void Movement()
     {
         Vector3 inputDir = new Vector3(inputMovement.x, 0, inputMovement.y);
         Vector3 direction = (initialRotation * inputDir).normalized;
-        direction.y = 0f; // Asegurarse de que la dirección no tenga componente vertical
+        direction.y = 0f; // Make sure the direction has no vertical component
         direction.Normalize();
 
         if (direction.magnitude > 0.1f)
@@ -107,7 +108,7 @@ public class playerManager : MonoBehaviour
         }
     }
 
-    // Decide qué acción tomar según el tag del objeto con el que se interactúa.
+    // Decides which action to take based on the tag of the object being interacted with.
     public void InteractWith(string tagCase)
     {
         switch (tagCase)
@@ -138,22 +139,22 @@ public class playerManager : MonoBehaviour
         }
     }
 
-    // TODO: entregar currentDrink al currentCustomer (traducir MixResult -> Customer.OrderResult)
     public void GiveDrink()
     {
         if (currentCustomer == null) return;
-        
+
         if (!hasMixedDrink) return;
 
         Customer.OrderResult translatedResult = TranslateResult(currentDrink.result);
         currentCustomer.ReceiveOrder(translatedResult);
-        //Debug.Log($"Pedido entregado: {translatedResult}");
 
         hasMixedDrink = false;
         currentDrink = null;
+
+        StartCoroutine(ShowDeliveredMessage());
     }
 
-    // Si ya hay 3 ingredientes juntados, calcula el resultado de la mezcla.
+    // If 3 ingredients have already been collected, calculates the mix result.
     public void MixingRecipe()
     {
         if (collectedIngredients.Count == 3)
@@ -163,35 +164,20 @@ public class playerManager : MonoBehaviour
                 currentDrink = mixManager.GetMixResult(collectedIngredients.ToArray());
                 hasMixedDrink = true;
                 collectedIngredients.Clear();
-                print("se mezclo bien");
             }
             else
             {
-                Debug.LogError("No se encontro MixManager");
+                Debug.LogError("MixManager not found");
             }
-        }
-        else
-        {
-            //Debug.Log("Se necesitan al menos 3 ingredientes");
         }
     }
 
-    // Agrega un ingrediente a la mezcla en curso (máximo 3 a la vez).
+    // Adds an ingredient to the current mix (max 3 at a time).
     private void AddIngredient(int ingredientId)
     {
         if (collectedIngredients.Count < 3)
         {
             collectedIngredients.Add(ingredientId);
-            //Debug.Log($"Ingrediente {ingredientId} recolectado. Total: {collectedIngredients.Count}/3");
-
-            if (collectedIngredients.Count == 3)
-            {
-                //Debug.Log("¡Ya tienes 3 ingredientes! Ve a mezclarlos!.");
-            }
-        }
-        else
-        {
-            //Debug.Log("¡No puedes llevar mas ingredientes!.");
         }
     }
 
@@ -213,7 +199,6 @@ public class playerManager : MonoBehaviour
         RaycastHit hitInfo;
         Vector3 rayOrigin = transform.position + Vector3.up * interactHeightOffset;
         bool didHit = Physics.SphereCast(rayOrigin, interactRadius, transform.forward, out hitInfo, interactDistance, interactableLayer);
-        Debug.DrawRay(rayOrigin, transform.forward * interactDistance, didHit ? Color.green : Color.red);
 
         if (didHit)
         {
@@ -226,17 +211,17 @@ public class playerManager : MonoBehaviour
                 if (currentCustomer == null)
                 {
                     currentCustomer = hitInfo.collider.GetComponentInParent<Customer>();
-                }    
+                }
             }
-        }    
+        }
         else
         {
             isInteract = false;
-            playerInteractionTag = "";  
+            playerInteractionTag = "";
         }
 
         UpdateInteractionText(hitInfo, didHit);
-    }  
+    }
 
     private void UpdateInteractionText(RaycastHit hitInfo, bool didHit)
     {
@@ -247,11 +232,7 @@ public class playerManager : MonoBehaviour
         }
 
         interactionText.gameObject.SetActive(true);
-        interactionText.transform.position = hitInfo.collider.transform.position + Vector3.up * 0.8f; // Ajusta la altura del texto según sea necesario
-
-        //Vector3 directionToCamera = Camera.main.transform.position - interactionText.transform.position;
-        //directionToCamera.y = 0f;
-        //interactionText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
+        interactionText.transform.position = hitInfo.collider.transform.position + Vector3.up * 0.8f;
 
         switch (hitInfo.collider.tag)
         {
@@ -266,11 +247,11 @@ public class playerManager : MonoBehaviour
             case "IngredientThree":
                 interactionText.text = "Blue";
                 break;
-                
+
             case "IngredientFour":
                 interactionText.text = "Green";
                 break;
-            
+
             default:
                 interactionText.gameObject.SetActive(false);
                 break;
@@ -279,11 +260,14 @@ public class playerManager : MonoBehaviour
 
     private void UpdateMixProgress()
     {
+        
         mixProgressText.transform.position = transform.position + Vector3.up * 2f;
 
         Vector3 directionToCamera = Camera.main.transform.position - mixProgressText.transform.position;
         directionToCamera.y = 0f;
         mixProgressText.transform.rotation = Quaternion.LookRotation(-directionToCamera);
+
+        if (showingDeliveredMessage) return;
 
         if (hasMixedDrink)
         {
@@ -309,5 +293,13 @@ public class playerManager : MonoBehaviour
             mixProgressText.text = $"{collectedIngredients.Count}/3";
         }
     }
-    
+
+    private IEnumerator ShowDeliveredMessage()
+    {
+        showingDeliveredMessage = true;
+        mixProgressText.gameObject.SetActive(true);
+        mixProgressText.text = "Done!";
+        yield return new WaitForSeconds(1f);
+        showingDeliveredMessage = false;
+    }
 }

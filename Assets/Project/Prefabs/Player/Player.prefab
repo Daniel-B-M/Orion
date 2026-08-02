@@ -26,7 +26,7 @@ RectTransform:
   m_GameObject: {fileID: 3428179390287757374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.53}
-  m_LocalScale: {x: 5.0299997, y: 5.03, z: 31.4375}
+  m_LocalScale: {x: 5.03, y: 5.03, z: 31.4375}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4784123110576988291}
@@ -90,7 +90,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
-  m_Size: {x: 2.63, y: 1}
+  m_Size: {x: 5, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -112,7 +112,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4784123110576988291
 RectTransform:
   m_ObjectHideFlags: 0
@@ -131,7 +131,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 2.751}
-  m_SizeDelta: {x: 20, y: 5}
+  m_SizeDelta: {x: 25.44, y: 5.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &6084463626776939523
 MeshRenderer:
@@ -246,7 +246,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}

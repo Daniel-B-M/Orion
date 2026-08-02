@@ -13,7 +13,7 @@ public class Menu_Pausa : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (isPaused)
                 ResumeGame();
@@ -25,7 +25,7 @@ public class Menu_Pausa : MonoBehaviour
 
     public void PauseGame()
     {
-        Debug.Log("PauseGame() fue llamado");
+        Debug.Log("PauseGame() was called");
         Time.timeScale = 0;
         pauseButton.SetActive(false);
         pauseMenu.SetActive(true);
@@ -37,6 +37,7 @@ public class Menu_Pausa : MonoBehaviour
         pauseButton.SetActive(true);
         pauseMenu.SetActive(false);
         isPaused = false;
+        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
     }
 
     public void RestartGame()
@@ -44,12 +45,6 @@ public class Menu_Pausa : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         Time.timeScale = 1;
         isPaused = false;
-    }
-
-    public void QuitGame()
-    {
-        Debug.Log("Close Game bro...");
-        Application.Quit();
     }
 
     public void GoToMainMenu()

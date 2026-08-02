@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI victoryReasonText;
     [SerializeField] private TextMeshProUGUI gameOverReasonText;
     private SpawnManager spawnManager;
+    [SerializeField] private TextMeshProUGUI scoreboardText;
 
 
     private void Awake()
@@ -45,6 +46,8 @@ public class GameManager : MonoBehaviour
             timeRemaining = 0f;
             EndGame(true);
         }
+
+        UpdateScoreboard();
     }
 
     private void EndGame(bool playerWon)
@@ -56,12 +59,12 @@ public class GameManager : MonoBehaviour
         if (playerWon)
         {
             panelVictory.SetActive(true);
-            victoryReasonText.text = $"Sobreviviste los 2 minutos — Clientes satisfechos: {satisfiedCount}";
+            victoryReasonText.text = $"You survived 2 minutes — Satisfied customers: {satisfiedCount}";
         }
         else
         {
             panelGameOver.SetActive(true);
-            gameOverReasonText.text = $"{sickCount} enfermos, {badServiceCount} insatisfechos";
+            gameOverReasonText.text = $"{sickCount} sick customers, {badServiceCount} dissatisfied customers";
         }
     }
 
@@ -89,5 +92,17 @@ public class GameManager : MonoBehaviour
         {
             EndGame(false);
         }
+    }
+
+    private string FormatTime(float time)
+    {
+        int minutes = Mathf.FloorToInt(time / 60f);
+        int seconds = Mathf.FloorToInt(time % 60f);
+        return $"{minutes}:{seconds:00}";
+    }
+
+    private void UpdateScoreboard()
+    {
+        scoreboardText.text = $"Time: {FormatTime(timeRemaining)} | Sick: {sickCount} | Unsatisfied: {badServiceCount} | Satisfied: {satisfiedCount}";
     }
 }
